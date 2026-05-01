@@ -22,3 +22,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Android specific files
+android/local.properties
+android/.gradle/
+android/build/
+android/app/build/
+android/.idea/
