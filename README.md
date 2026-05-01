@@ -1,16 +1,56 @@
-# React + Vite
+# Docu Drop
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Docu Drop is a mobile-first, entirely offline web application designed to store and organize travel documents, tickets, and boarding passes. It features a sleek, overlapping stacked-card interface inspired by Apple Wallet.
 
-Currently, two official plugins are available:
+> 🤖 **Vibe-coded with Gemini**: The core logic, user interface, and database architecture of this application were generated iteratively using Google's Gemini model.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+---
 
-## React Compiler
+## Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- 🔌 **100% Offline**: Uses the browser's native IndexedDB to permanently store binary files (PDFs and images) locally on your device. No servers, no cloud storage, no privacy concerns.
+- **Wallet UI**: Documents are visually organized into a stack of overlapping, color-coded cards for quick visual parsing and a premium feel.
+- **Format Support**: Seamlessly accepts both image files (`.jpg`, `.png`) and `.pdf` documents.
+- **Integrated Viewer**: Full-screen modal to view images and read PDFs directly within the app.
+- **Quality of Life**:
+  - Global search for quick access.
+  - Instantaneous Dark/Light mode toggling.
+  - Persistent storage across browser sessions.
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Tech Stack
+
+- **Frontend:** React (via Vite)
+- **Styling:** Tailwind CSS v4
+- **Icons:** Lucide React
+- **Storage:** Native IndexedDB API
+
+---
+
+## Local Development
+
+To get Docu Drop running on your machine:
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/your-username/DocuDrop.git
+   cd DocuDrop
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Start the development server**
+   ```bash
+   npm run dev
+   ```
+
+---
+
+## Future Roadmap
+
+### Android / iOS Support
+This React PWA is designed to be easily wrapped into a native Android APK using tools like Capacitor or AppsGeyser, maintaining its offline capabilities through WebView's access to local storage.
