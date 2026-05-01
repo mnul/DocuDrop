@@ -56,7 +56,9 @@ const deleteDocumentDB = async (id) => {
 // --- Main App Component ---
 export default function App() {
   const [documents, setDocuments] = useState([]);
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(() => 
+    window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+  );
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [selectedDoc, setSelectedDoc] = useState(null);
