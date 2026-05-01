@@ -34,7 +34,7 @@ To get Docu Drop running on your machine:
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/your-username/DocuDrop.git
+   git clone https://github.com/mnul/DocuDrop.git
    cd DocuDrop
    ```
 
