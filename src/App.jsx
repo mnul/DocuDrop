@@ -64,23 +64,22 @@ export default function App() {
   const [selectedDoc, setSelectedDoc] = useState(null);
   const fileInputRef = useRef(null);
 
-  // Colors for the top bar of the cards
+  // Farben für die Karten-Kopfzeilen
   const colors = ['#EF4444', '#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899', '#14B8A6'];
 
   useEffect(() => {
-    // Load offline documents on startup
+    // Dokumente beim Start laden
     loadDocuments().then(data => {
-      // Sort by newest first
       setDocuments(data.sort((a, b) => b.timestamp - a.timestamp));
     }).catch(console.error);
 
-    // Apply dark mode class to body for full screen background
+    // Dark Mode auf das Dokument anwenden
     if (isDarkMode) {
       document.documentElement.classList.add('dark');
-      document.body.style.backgroundColor = '#111827'; // gray-900
+      document.body.style.backgroundColor = '#111827';
     } else {
       document.documentElement.classList.remove('dark');
-      document.body.style.backgroundColor = '#F3F4F6'; // gray-100
+      document.body.style.backgroundColor = '#F3F4F6';
     }
   }, [isDarkMode]);
 
@@ -91,7 +90,7 @@ export default function App() {
     const reader = new FileReader();
     reader.onload = async (event) => {
       const base64Data = event.target.result;
-      const title = prompt('Enter a title for this document:') || file.name.split('.')[0];
+      const title = prompt('Titel für dieses Dokument:') || file.name.split('.')[0];
       
       const newDoc = {
         id: Date.now().toString(),
@@ -106,15 +105,15 @@ export default function App() {
         await saveDocument(newDoc);
         setDocuments(prev => [newDoc, ...prev]);
       } catch (err) {
-        console.error('Error saving to offline database:', err);
+        console.error('Fehler beim Speichern:', err);
       }
     };
-    reader.readAsDataURL(file); // Convert to base64 for reliable offline storage/rendering
-    e.target.value = ''; // Reset input
+    reader.readAsDataURL(file);
+    e.target.value = '';
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Delete this document?')) {
+    if (window.confirm('Dieses Dokument löschen?')) {
       await deleteDocumentDB(id);
       setDocuments(prev => prev.filter(doc => doc.id !== id));
       setSelectedDoc(null);
@@ -141,12 +140,12 @@ export default function App() {
         </div>
       </header>
 
-      {/* Search Bar */}
+      {/* Suchleiste */}
       {isSearchOpen && (
         <div className="px-6 mb-4">
           <input
             type="text"
-            placeholder="Search documents..."
+            placeholder="Dokumente durchsuchen..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full px-4 py-3 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
@@ -160,8 +159,8 @@ export default function App() {
         {filteredDocs.length === 0 ? (
           <div className="mt-20 text-center text-gray-500 dark:text-gray-400">
             <FileText size={48} className="mx-auto mb-4 opacity-50" />
-            <p>No documents found.</p>
-            <p className="text-sm mt-2">Tap the + button to add one.</p>
+            <p>Keine Dokumente vorhanden.</p>
+            <p className="text-sm mt-2">Nutze das +, um Dateien hinzuzufügen.</p>
           </div>
         ) : (
           <div 
@@ -180,7 +179,6 @@ export default function App() {
                   transformOrigin: 'top center',
                 }}
               >
-                {/* Solid Color Top Bar */}
                 <div 
                   className="h-16 w-full px-5 flex items-center justify-between" 
                   style={{ backgroundColor: doc.color }}
@@ -189,13 +187,12 @@ export default function App() {
                   {doc.type.includes('image') ? <ImageIcon color="white" size={20} /> : <FileText color="white" size={20} />}
                 </div>
                 
-                {/* Card Body Preview */}
                 <div className="p-4 h-[calc(100%-4rem)] bg-white dark:bg-gray-800 flex items-center justify-center border-x border-b border-gray-200 dark:border-gray-700 rounded-b-2xl">
                   {doc.type.includes('image') ? (
                     <div className="w-full h-full bg-cover bg-center rounded-lg" style={{ backgroundImage: `url(${doc.data})` }} />
                   ) : (
                     <div className="w-full h-full border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-                      <span className="text-gray-400 font-medium">PDF Document</span>
+                      <span className="text-gray-400 font-medium text-center px-4">PDF Dokument</span>
                     </div>
                   )}
                 </div>
@@ -205,7 +202,7 @@ export default function App() {
         )}
       </main>
 
-      {/* Floating Action Button for Upload */}
+      {/* Floating Action Button */}
       <input 
         type="file" 
         accept="image/*,application/pdf" 
@@ -220,9 +217,9 @@ export default function App() {
         <Plus size={32} />
       </button>
 
-      {/* Fullscreen Document Viewer Modal */}
+      {/* Dokumenten-Viewer Modal */}
       {selectedDoc && (
-        <div className="fixed inset-0 z-[100] bg-black/90 flex flex-col backdrop-blur-md">
+        <div className="fixed inset-0 z-[100] bg-black/95 flex flex-col">
           <div className="flex justify-between items-center p-4 bg-black/50 text-white">
             <h2 className="font-bold text-xl truncate pr-4">{selectedDoc.title}</h2>
             <div className="flex gap-4">
