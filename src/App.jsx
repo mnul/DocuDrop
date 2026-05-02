@@ -1,5 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Search, Moon, Sun, Plus, X, FileText, Image as ImageIcon, Trash2 } from 'lucide-react';
+import { Document, Page, pdfjs } from 'react-pdf';
+
+// CSS für react-pdf (wichtig für Textauswahl und Links)
+import 'react-pdf/dist/Page/AnnotationLayer.css';
+import 'react-pdf/dist/Page/TextLayer.css';
+
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+  'pdfjs-dist/build/pdf.worker.min.mjs',
+  import.meta.url,
+).toString();
 
 // --- IndexedDB Helfer ---
 const DB_NAME = 'DocuDropDB';
@@ -72,6 +82,7 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [selectedDoc, setSelectedDoc] = useState(null);
+  const [numPages, setNumPages] = useState(null);
   const [blobUrl, setBlobUrl] = useState(null);
   const fileInputRef = useRef(null);
 
@@ -132,7 +143,12 @@ export default function App() {
     const blob = base64ToBlob(doc.data, doc.type);
     const url = URL.createObjectURL(blob);
     setBlobUrl(url);
+    setNumPages(null); // Seitenanzahl zurücksetzen
     setSelectedDoc(doc);
+  };
+
+  const onDocumentLoadSuccess = ({ numPages }) => {
+    setNumPages(numPages);
   };
 
   const handleDelete = async (id) => {
@@ -258,16 +274,25 @@ export default function App() {
             {selectedDoc.type.includes('image') ? (
                <img src={blobUrl} alt={selectedDoc.title} className="max-w-full max-h-full object-contain rounded-lg shadow-2xl" />
             ) : (
-               <div className="w-full h-full flex flex-col items-center">
-                 {/* Hinweis: In Android APKs kann ein iframe für PDFs weiß bleiben. */}
-                 {/* In diesem Fall ist react-pdf (canvas rendering) zwingend notwendig. */}
-                 <iframe 
-                  src={`${blobUrl}#toolbar=0&navpanes=0&scrollbar=0`} 
-                  className="w-full h-full bg-white rounded-lg shadow-2xl" 
-                  title={selectedDoc.title} 
-                 />
+               <div className="w-full h-full flex flex-col items-center overflow-auto custom-scrollbar">
+                 <Document
+                   file={blobUrl}
+                   onLoadSuccess={onDocumentLoadSuccess}
+                   loading={<div className="text-white mt-10">PDF wird vorbereitet...</div>}
+                   error={<div className="text-red-500 mt-10">Fehler beim Laden des PDFs.</div>}
+                   className="flex flex-col items-center"
+                 >
+                   {Array.from(new Array(numPages), (el, index) => (
+                     <Page 
+                       key={`page_${index + 1}`} 
+                       pageNumber={index + 1} 
+                       width={Math.min(window.innerWidth - 32, 600)}
+                       className="mb-4 shadow-2xl rounded-sm overflow-hidden"
+                     />
+                   ))}
+                 </Document>
                  <p className="text-white/50 text-[10px] mt-2 italic text-center">
-                   Hinweis: Falls dieses Fenster weiß bleibt, unterstützt dein System kein natives PDF-Rendering im WebView.
+                   {numPages} {numPages === 1 ? 'Seite' : 'Seiten'} geladen
                  </p>
                </div>
             )}
