@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { 
   Search, Moon, Sun, Plus, X, FileText,
   Trash2, Settings, Download, Upload,
-  Loader2, CheckCircle2, AlertCircle 
+  Loader2, CheckCircle2, AlertCircle, Edit
 } from 'lucide-react';
 
 // Capacitor & PDF Imports
@@ -88,6 +88,8 @@ export default function App() {
   const [selectedDoc, setSelectedDoc] = useState(null);
   const [numPages, setNumPages] = useState(null);
   const [blobUrl, setBlobUrl] = useState(null);
+  const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
+  const [tempTitle, setTempTitle] = useState('');
   
   const fileInputRef = useRef(null);
   const importInputRef = useRef(null);
@@ -111,6 +113,31 @@ export default function App() {
       return () => clearTimeout(t);
     }
   }, [status]);
+
+  const renameDocument = async (id, newTitle) => {
+    try {
+      const docToRename = documents.find(d => d.id === id);
+      if (docToRename) {
+        const updatedDoc = { ...docToRename, title: newTitle };
+        await saveDocument(updatedDoc);
+        refreshDocs(); // Re-fetch all documents to update the list
+        if (selectedDoc && selectedDoc.id === id) {
+          setSelectedDoc(updatedDoc); // Update the currently viewed document if it was renamed
+        }
+        setStatus({ type: 'success', message: 'Renamed' });
+      }
+    } catch (error) {
+      console.error("Rename error:", error);
+      setStatus({ type: 'error', message: 'Rename failed' });
+    }
+  };
+
+  const handleConfirmRename = async () => {
+    if (tempTitle.trim() && selectedDoc && tempTitle.trim() !== selectedDoc.title) {
+      await renameDocument(selectedDoc.id, tempTitle.trim());
+    }
+    setIsRenameModalOpen(false);
+  };
 
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
@@ -312,13 +339,40 @@ export default function App() {
             {({ zoomIn, zoomOut, resetTransform }) => (
               <div className="flex flex-col h-full w-full">
                 <header className="p-5 flex justify-between items-center bg-black/50 text-white backdrop-blur-md z-20">
-                  <h2 className="font-bold truncate max-w-[40%]">{selectedDoc.title}</h2>
+                  <div className="flex items-center gap-2">
+                    <h2 className="font-bold truncate max-w-[40%]">{selectedDoc.title}</h2>
+                    <Edit size={16} className="cursor-pointer opacity-70 hover:opacity-100" onClick={() => { setTempTitle(selectedDoc.title); setIsRenameModalOpen(true); }} />
+                  </div>
                   <div className="flex gap-4 items-center">
                     <Trash2 onClick={() => { if(window.confirm('Delete permanently?')) { deleteDoc(selectedDoc.id); refreshDocs(); setSelectedDoc(null); setBlobUrl(null); resetTransform(); } }} className="text-red-500 cursor-pointer" />
                     <X onClick={() => { setSelectedDoc(null); setBlobUrl(null); setNumPages(null); resetTransform(); }} className="cursor-pointer" />
                   </div>
                 </header>
 
+                {isRenameModalOpen && (
+                  <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[150]">
+                    <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-2xl flex flex-col gap-4 w-80">
+                      <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">Rename Document</h3>
+                      <input
+                        type="text"
+                        value={tempTitle}
+                        onChange={(e) => setTempTitle(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === 'Enter') { handleConfirmRename(); } }}
+                        className="w-full p-3 rounded-lg bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        autoFocus
+                      />
+                      <div className="flex justify-end gap-3">
+                        <button
+                          onClick={() => setIsRenameModalOpen(false)}
+                          className="px-4 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+                        >
+                          Cancel
+                        </button>
+                        <button onClick={handleConfirmRename} className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors">OK</button>
+                      </div>
+                    </div>
+                  </div>
+                )}
                 <main className="flex-1 overflow-hidden bg-black">
                   <TransformComponent
                     wrapperStyle={{ width: '100vw', height: 'calc(100vh - 80px)' }}
