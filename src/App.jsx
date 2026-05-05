@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   Search, Moon, Sun, Plus, X, FileText,
-  Trash2, Settings, Download, Upload, ZoomIn, ZoomOut,
+  Trash2, Settings, Download, Upload,
   Loader2, CheckCircle2, AlertCircle 
 } from 'lucide-react';
 

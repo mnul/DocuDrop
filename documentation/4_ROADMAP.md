@@ -1,6 +1,6 @@
 # DocuDrop Roadmap
 
-## Current State (v0.1.1)
+## Current State (v0.1.2)
 - [x] Vertical "Wallet" Carousel UI.
 - [x] IndexedDB persistent storage.
 - [x] PDF and Image support.
@@ -13,7 +13,6 @@
 ## Short-Term Goals (Next Releases)
 
 ### 1. Document Management
-- **Make opened items zoomable**: Opened items (cards) are currently not zoomable and can end up very small. Implement a pinch-to-zoom gesture.
 - **Reorganizing Cards**: Implement a long-press and drag-and-drop system to allow users to manually reorder their stack.
 - **Easier Deletion**: Add swipe-to-delete gestures on the cards in the main view to complement the current permanent deletion inside the viewer.
 
