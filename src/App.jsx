@@ -300,25 +300,29 @@ export default function App() {
 
       {selectedDoc && (
         <div className="fixed inset-0 z-[100] bg-black flex flex-col">
-          <TransformWrapper initialScale={1} minScale={0.5} maxScale={5}>
-            {({ zoomIn, zoomOut }) => (
+          <TransformWrapper 
+            initialScale={1} 
+            minScale={1} // Prevents zooming out smaller than the initial "fit to width" view
+            maxScale={5} 
+            centerOnInit={true}
+            limitToBounds={true}
+            doubleTap={{ step: 0.5 }}
+            panning={{ velocityDisabled: false }}
+          >
+            {({ zoomIn, zoomOut, resetTransform }) => (
               <div className="flex flex-col h-full w-full">
                 <header className="p-5 flex justify-between items-center bg-black/50 text-white backdrop-blur-md z-20">
                   <h2 className="font-bold truncate max-w-[40%]">{selectedDoc.title}</h2>
                   <div className="flex gap-4 items-center">
-                    <div className="flex bg-white/10 rounded-xl p-1 gap-1">
-                      <button onClick={() => zoomOut()} className="p-1.5 active:bg-white/20 rounded-lg"><ZoomOut size={18} /></button>
-                      <button onClick={() => zoomIn()} className="p-1.5 active:bg-white/20 rounded-lg"><ZoomIn size={18} /></button>
-                    </div>
-                    <Trash2 onClick={() => { if(window.confirm('Delete permanently?')) { deleteDoc(selectedDoc.id); refreshDocs(); setSelectedDoc(null); setBlobUrl(null); } }} className="text-red-500 cursor-pointer" />
-                    <X onClick={() => { setSelectedDoc(null); setBlobUrl(null); setNumPages(null); }} className="cursor-pointer" />
+                    <Trash2 onClick={() => { if(window.confirm('Delete permanently?')) { deleteDoc(selectedDoc.id); refreshDocs(); setSelectedDoc(null); setBlobUrl(null); resetTransform(); } }} className="text-red-500 cursor-pointer" />
+                    <X onClick={() => { setSelectedDoc(null); setBlobUrl(null); setNumPages(null); resetTransform(); }} className="cursor-pointer" />
                   </div>
                 </header>
 
                 <main className="flex-1 overflow-hidden bg-black">
                   <TransformComponent
                     wrapperStyle={{ width: '100vw', height: 'calc(100vh - 80px)' }}
-                    contentStyle={{ minWidth: '100vw', minHeight: 'calc(100vh - 80px)', display: 'flex', justifyContent: 'center', alignItems: 'flex-start' }}
+                    contentStyle={{ width: '100vw', minHeight: 'calc(100vh - 80px)', display: 'flex', justifyContent: 'center', alignItems: 'flex-start' }}
                   >
                     <div className="w-full flex flex-col items-center p-4">
                       {selectedDoc.type.includes('image') ? (
@@ -332,8 +336,8 @@ export default function App() {
                           {Array.from(new Array(numPages || 0), (_, i) => (
                             <Page 
                               key={i} 
-                              pageNumber={i+1} 
-                              scale={1.4} 
+                              pageNumber={i+1}
+                              // Removed explicit scale, react-pdf will fit to width automatically
                               width={window.innerWidth - 32} 
                               className="mb-6 rounded-lg shadow-2xl overflow-hidden" 
                               renderTextLayer={false} 
