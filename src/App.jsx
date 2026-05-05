@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   Search, Moon, Sun, Plus, X, FileText,
-  Trash2, Settings, Download, Upload,
+  Trash2, Settings, Download, Upload, ZoomIn, ZoomOut,
   Loader2, CheckCircle2, AlertCircle 
 } from 'lucide-react';
 
@@ -9,6 +9,9 @@ import {
 import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
 import { Document, Page, pdfjs } from 'react-pdf';
+
+// High-performance Zoom/Pan Library
+import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 
 // App Version pulled dynamically from package.json
 import { version as VERSION } from '../package.json';
@@ -297,24 +300,54 @@ export default function App() {
 
       {selectedDoc && (
         <div className="fixed inset-0 z-[100] bg-black flex flex-col">
-          <div className="p-5 flex justify-between items-center bg-black/50 text-white backdrop-blur-md">
-            <h2 className="font-bold truncate max-w-[60%]">{selectedDoc.title}</h2>
-            <div className="flex gap-6 items-center">
-              <Trash2 onClick={() => { if(confirm('Delete permanently?')) { deleteDoc(selectedDoc.id); refreshDocs(); setSelectedDoc(null); } }} className="text-red-500" />
-              <X onClick={() => { setSelectedDoc(null); setBlobUrl(null); }} />
-            </div>
-          </div>
-          <div className="flex-1 overflow-auto p-4 flex justify-center">
-            {selectedDoc.type.includes('image') ? <img src={blobUrl} className="max-w-full h-auto self-start rounded-lg shadow-2xl" /> : (
-              <div className="w-full">
-                <Document file={blobUrl} onLoadSuccess={({numPages}) => setNumPages(numPages)}>
-                  {Array.from(new Array(numPages || 0), (_, i) => (
-                    <Page key={i} pageNumber={i+1} width={window.innerWidth - 32} className="mb-4 rounded shadow-lg overflow-hidden" renderTextLayer={false} renderAnnotationLayer={false} />
-                  ))}
-                </Document>
+          <TransformWrapper initialScale={1} minScale={0.5} maxScale={5}>
+            {({ zoomIn, zoomOut }) => (
+              <div className="flex flex-col h-full w-full">
+                <header className="p-5 flex justify-between items-center bg-black/50 text-white backdrop-blur-md z-20">
+                  <h2 className="font-bold truncate max-w-[40%]">{selectedDoc.title}</h2>
+                  <div className="flex gap-4 items-center">
+                    <div className="flex bg-white/10 rounded-xl p-1 gap-1">
+                      <button onClick={() => zoomOut()} className="p-1.5 active:bg-white/20 rounded-lg"><ZoomOut size={18} /></button>
+                      <button onClick={() => zoomIn()} className="p-1.5 active:bg-white/20 rounded-lg"><ZoomIn size={18} /></button>
+                    </div>
+                    <Trash2 onClick={() => { if(window.confirm('Delete permanently?')) { deleteDoc(selectedDoc.id); refreshDocs(); setSelectedDoc(null); setBlobUrl(null); } }} className="text-red-500 cursor-pointer" />
+                    <X onClick={() => { setSelectedDoc(null); setBlobUrl(null); setNumPages(null); }} className="cursor-pointer" />
+                  </div>
+                </header>
+
+                <main className="flex-1 overflow-hidden bg-black">
+                  <TransformComponent
+                    wrapperStyle={{ width: '100vw', height: 'calc(100vh - 80px)' }}
+                    contentStyle={{ minWidth: '100vw', minHeight: 'calc(100vh - 80px)', display: 'flex', justifyContent: 'center', alignItems: 'flex-start' }}
+                  >
+                    <div className="w-full flex flex-col items-center p-4">
+                      {selectedDoc.type.includes('image') ? (
+                        <img src={blobUrl} className="max-w-full h-auto rounded-xl shadow-2xl" alt="" />
+                      ) : (
+                        <Document 
+                          file={blobUrl} 
+                          onLoadSuccess={({numPages}) => setNumPages(numPages)}
+                          loading={<div className="text-white font-bold opacity-30 uppercase tracking-widest mt-20">Opening PDF...</div>}
+                        >
+                          {Array.from(new Array(numPages || 0), (_, i) => (
+                            <Page 
+                              key={i} 
+                              pageNumber={i+1} 
+                              scale={1.4} 
+                              width={window.innerWidth - 32} 
+                              className="mb-6 rounded-lg shadow-2xl overflow-hidden" 
+                              renderTextLayer={false} 
+                              renderAnnotationLayer={false} 
+                            />
+                          ))}
+                        </Document>
+                      )}
+                    </div>
+                  </TransformComponent>
+                </main>
               </div>
             )}
-          </div>
+          </TransformWrapper>
         </div>
       )}
     </div>

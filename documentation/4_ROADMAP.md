@@ -8,6 +8,7 @@
 - [x] Native Android Export (Share Sheet) and Import.
 - [x] Dark Mode support.
 - [x] Dynamic versioning from `package.json`.
+- [x] Pinch-to-zoom for documents.
 
 ## Short-Term Goals (Next Releases)
 
